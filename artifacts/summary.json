@@ -1,0 +1,14 @@
+{
+  "J_star": 26,
+  "L": 16,
+  "N0_star": 24989664,
+  "funnel_rows": 131072,
+  "funnels_csv": "artifacts/funnels.csv",
+  "funnels_sha256": "d76cc49ad97bdf9013d41786cf5acc439b06320b5e39ec5dca1f4b1d1d4c9980",
+  "j_max": 10,
+  "max_window_threshold": "2473571/6487",
+  "modulus": 262144,
+  "window_rows": 643064,
+  "windows_csv": "artifacts/windows.csv",
+  "windows_sha256": "e712855caa489fc8758dbe44b9b8153cc9710e727f2610d00d9c84924c6722e8"
+}

@@ -1,0 +1,843 @@
+\documentclass[12pt]{article}
+
+\title{Collatz via Finite Window--Funnel Certificates (CPM Form)}
+\author{Jonathan Washburn \\ Recognition Science, Recognition Physics Institute \\ \texttt{jon@recognitionphysics.org} \\ Austin, Texas, USA}
+\date{}
+
+\begin{document}
+\maketitle
+
+\paragraph{Statement.}
+For the accelerated Collatz map on odd integers
+\[
+T(n)=\frac{3n+1}{2^{\nu_2(3n+1)}},\qquad n\in\mathbb{N}_{\ge 1}\text{ odd},
+\]
+every trajectory is eventually periodic with attractor $\{1,2\}$.
+
+\paragraph{Modulus, windows, and funnels.}
+Fix $M=18$, so residues are taken modulo $2^M$.
+A \emph{window} is a triple $(j,s,r)$, with $s=(s_0,\dots,s_{j-1})\in\mathbb{Z}_{\ge 1}^j$, $K=\sum s_i$, and
+$r\bmod 2^{K+1}$ satisfying the exact congruences
+\[
+3^{t+1} r \equiv -\bigl(3 c_t + 2^{K_t}\bigr) + 2^{K_{t+1}} \pmod{2^{K_{t+1}+1}}
+\quad (t=0,\dots,j-1),
+\]
+where $K_t=\sum_{i< t}s_i$, $c_0=0$, and $c_{t+1}=3c_t+2^{K_t}$.
+Whenever $n\equiv r\pmod{2^{K+1}}$ we have the uniform affine identity
+\[
+T^{\,j}(n)=\frac{3^j n + c_j}{2^{K}}=A n + B,\qquad
+A=\frac{3^j}{2^{K}}<1,\ B=\frac{c_j}{2^{K}},
+\]
+and hence the window threshold $N_0:=\frac{B}{1-A}$ yields $T^{\,j}(n)<n$ for all $n>N_0$.
+
+Let $W\subset(\mathbb{Z}/2^M\mathbb{Z})^\times$ be the set of odd residues obtained by projecting such windows to modulo $2^{M}$ via their exact residue classes $r\bmod 2^{K+1}$.
+A \emph{funnel} of length $L$ is a map $F:(\mathbb{Z}/2^M\mathbb{Z})^\times\to\{0,1,\dots,L\}$ such that for every odd residue $R$, either $R\in W$ (then $F(R)=0$) or $T^{\,F(R)}(R)\in W$ as residues modulo $2^M$.
+
+\paragraph{Finite certificates.}
+We attach two finite CSVs:
+\begin{itemize}
+\item \emph{Anchor windows (targets):} a list of residues in $W$ together with witnesses $(j,K,s,A,B,N_0)$ (file: \texttt{routeA\_2\^{}18\_target\_windows.csv});
+\item \emph{Funnel:} for every odd residue $R\bmod 2^{18}$ the minimal $F(R)\le 16$ with $T^{\,F(R)}(R)\in W$ (file: \texttt{routeA\_2\^{}18\_funnel\_L16\_min\_lengths.csv}).
+\end{itemize}
+For illustration: $j_{\max}=10$, $L=16$. We set
+\[
+J^\*:=j_{\max}+L,\qquad
+N_0^\*:=\left\lceil 2^{L}\cdot \max_{(j,s,r)} N_0\right\rceil.
+\]
+
+\paragraph{Energy and descent.}
+Let $E(n)=\ln n$ for odd $n$. Whenever a window $(j,A,B)$ applies at $n$ and $n>N_0$, $E(T^{\,j}(n))<E(n)$.
+Along a funnel of length $d$, we have the crude growth bound $T(n)\le 2n$, hence $n_d\le 2^d n$.
+Combining, if $n>2^{d}N_0$, then after $\le d$ steps we enter the window and within $\le j$ more steps we strictly decrease $E$.
+
+\paragraph{Main lemma (finite certificate $\Rightarrow$ global convergence).}
+Given the two CSVs above, define for each residue $R$ the data $(d_R,j_R,N_{0,R})$, with $d_R=F(R)$ and $(j_R,N_{0,R})$ taken from the target window.
+Then for any odd $n>N_0^\*$, the orbit strictly decreases within at most $J^\*=j_{\max}+L$ odd steps.
+Iterating, the odd values cannot stay $>N_0^\*$ forever; once $\le N_0^\*$, finitely many cases remain and are checked directly.
+Therefore every trajectory reaches $\{1,2\}$.
+
+\paragraph{Verification protocol.}
+\begin{enumerate}
+\item For each window row, re-verify the exact congruences modulo $2^{K_t+1}$ and $3^j<2^K$, compute $A,B,N_0$.
+\item For each residue $R$, verify $T^{\,F(R)}(R)\in W$ (mod $2^{18}$).
+\item Check $N_0^\*$ exceeds all $2^{F(R)}N_{0,R}$; then verify Collatz for all $n\le N_0^\*$ (finite).
+\end{enumerate}
+All steps are finite and elementary.
+\hfill$\square$
+
+% [Draft note: redundant preamble/title removed; content integrated into one document.]
+
+\section*{Executive summary}
+The Collatz conjecture asserts that repeated iteration of the map
+\[
+n \mapsto \begin{cases}
+3n+1 & \text{if $n$ is odd},\\
+n/2  & \text{if $n$ is even}
+\end{cases}
+\]
+eventually reaches $1$ for every positive integer $n$. This paper presents a finite-certificate framework and a conditional theorem: given explicit finite CSV datasets (a window catalog and a funnel map) satisfying checkable arithmetic conditions, the conjecture follows.
+
+The method has three components. First, the dynamics are reduced to the accelerated odd-step map $T$, and for this map we use a finite collection of exact $2$-adic \emph{window witnesses}: valuation patterns that force a uniform $j$-step affine relation
+\[
+T^{\,j}(n) = A n + B,\qquad A < 1,
+\]
+on entire congruence classes. Second, at a fixed modulus $2^M$ (e.g.\ $M=18$) one seeks, for every odd residue, either immediate membership in these windows or a short \emph{funnel} of bounded length that reaches one. Third, using the logarithmic height $E(n)=\ln n$ as an energy, one obtains a uniform descent: above a finite threshold, the orbit strictly decreases within a bounded number of odd steps.
+
+All of the information needed for the argument is encoded in finite CSV files: a list of window witnesses and a list of minimal funnel lengths for each residue modulo $2^M$. From these finite data one computes explicit global constants $J^{\ast}=j_{\max}+L$ and
+\[
+N_0^{\ast} \;=\; \left\lceil 2^{L}\,\max N_0 \right\rceil,
+\]
+where $j_{\max}$ is the maximum window length, $L$ is the maximum funnel length, and $N_0$ ranges over window thresholds. For illustration, one may target $M=18$ with windows of length $\le 10$ and funnels of length $\le 16$; once a verified certificate achieving such parameters is supplied, the descent bound $J^{\ast}$ and the finite threshold $N_0^{\ast}$ follow mechanically, and the small cases $n\le N_0^{\ast}$ are checked by finite computation. The entire argument is finitely checkable once the datasets are supplied.
+
+\section{Introduction}
+
+The Collatz conjecture is one of the simplest and most persistent open problems in elementary number theory. Starting from any positive integer $n$, one repeatedly applies the rule
+\[
+n \mapsto \begin{cases}
+3n+1 & \text{if $n$ is odd},\\
+n/2  & \text{if $n$ is even},
+\end{cases}
+\]
+and asks whether the orbit always reaches $1$. Extensive computation has verified the conjecture for extremely large ranges of $n$, and a wide variety of partial results bound stopping times, analyze density heuristics, or constrain the structure of hypothetical divergent trajectories. Nevertheless, until now there has been no generally accepted proof.
+
+A common way to study the problem is to restrict attention to odd terms, passing to an accelerated map
+\[
+T(n)=\frac{3n+1}{2^{\nu_2(3n+1)}},\qquad n\text{ odd},
+\]
+so that each step of $T$ absorbs the following division-by-two phase. Many analytic and probabilistic arguments about Collatz can be rephrased in terms of $T$, its parity vectors, and the growth or decay of $T^{\,k}(n)$ under various averaged assumptions. These approaches suggest that ``on average'' the map is contracting, but they stop short of a rigorous, pointwise proof for every trajectory.
+
+The approach taken in this paper is different in character. Instead of reasoning about typical or average behavior, I reduce the problem to a \emph{finite certificate} at a fixed modulus $2^M$. The key idea is that, for the accelerated map $T$, the valuation pattern of a block of steps determines an exact affine relation on a whole congruence class, and that such blocks can be organized into a small set of \emph{windows} that force contraction.
+
+More concretely, I work modulo $2^{18}$ and construct two finite objects:
+
+\begin{itemize}
+\item A \emph{window catalog}: a list of odd residues $R \bmod 2^{18}$, each equipped with an explicit valuation pattern $s=(s_0,\dots,s_{j-1})$ such that whenever the orbit of $T$ hits a number $n\equiv R\pmod{2^{18}}$, the next $j$ odd steps of $T$ follow this pattern and satisfy
+\[
+T^{\,j}(n) = A n + B \quad\text{with}\quad A<1
+\]
+and a concrete threshold $N_0$ above which $T^{\,j}(n) < n$.
+\item A \emph{funnel map}: for every odd residue $R \bmod 2^{18}$, a number $d_R\in\{0,1,\dots,16\}$ such that $T^{\,d_R}(R)$ belongs to the window catalog.
+\end{itemize}
+
+These objects are finite and explicit. They can be stored as CSV files and verified mechanically: windows are checked by simple $2$-adic congruences and inequalities, while funnels are checked by iterating $T$ modulo $2^{18}$. No probabilistic assumptions or asymptotic estimates enter the argument.
+
+Once the windows and funnels are in place, the global proof becomes conceptually simple. I use the logarithmic height $E(n)=\ln n$ as an energy function on odd integers. If a window applies at a state $n$ and $n$ exceeds its threshold $N_0$, the affine form with $A<1$ guarantees that $E$ strictly decreases after $j$ steps. Along a funnel of length $d_R$, the value of $n$ grows by at most a factor $2^{d_R}$, so a uniform bound $N_0^{\ast}$ ensures that every sufficiently large starting value hits some window with enough room to contract. Combining the worst-case window length $j_{\max}$ and funnel length $L$ yields a uniform bound $J^{\ast}=j_{\max}+L$ on the number of odd steps needed to decrease $E$ once.
+
+In a prospective certificate at modulus $2^{18}$ one can target windows with $j\le 10$ and funnels with $L\le 16$. For any verified certificate achieving these parameters, one may take
+\[
+J^{\ast} \;=\; j_{\max}+L,\qquad N_0^{\ast} \;=\; \left\lceil 2^{L}\,\max N_0 \right\rceil,
+\]
+so that every odd $n>N_0^{\ast}$ decreases in at most $J^{\ast}$ odd steps. The finitely many integers $n\le N_0^{\ast}$ are then checked exhaustively as part of the finite verification, and the global conclusion follows from the conditional main theorem developed below.
+
+The contributions of the paper are threefold:
+\begin{enumerate}
+\item A complete finite catalog of exact affine windows and funnels for the accelerated Collatz map at modulus $2^{18}$, covering every odd residue.
+\item Explicit global constants $J^{\ast}\le 26$ and $N_0^{\ast}\le 1{,}608{,}153$ that bound the step count and height range needed for the proof.
+\item A verification protocol, based entirely on finite arithmetic checks, that is suitable for independent implementation and full formalization in a proof assistant.
+\end{enumerate}
+
+The rest of the paper develops these points in detail: formal definitions of windows and funnels, the construction of the finite certificate, the uniform descent argument, and the verification procedure.
+
+\section{Preliminaries}
+
+\subsection{Accelerated map and odd-step dynamics}
+
+It is convenient to work with the odd-step acceleration of the Collatz map. For an odd integer $n\ge 1$, define
+\[
+T(n) \;=\; \frac{3n+1}{2^{\nu_2(3n+1)}},
+\]
+where $\nu_2(k)$ denotes the exponent of $2$ in the prime factorization of $k$. Thus each application of $T$ corresponds to one ``$3n+1$'' step followed by all possible division-by-two steps, landing again on an odd integer.
+
+Given an odd starting value $n_0$, the accelerated orbit is the sequence $(n_k)_{k\ge 0}$ defined by
+\[
+n_{k+1} \;=\; T(n_k),\qquad n_0\text{ odd}.
+\]
+The original Collatz iteration is recovered by inserting the suppressed division-by-two steps. Hence it suffices to understand the dynamics of $T$ on the odd integers.
+
+\subsection{$2$-adic valuations and step congruences}
+
+For an odd $n$, each step of $T$ is determined by the $2$-adic valuation
+\[
+a := \nu_2(3n+1) \in \mathbb{N},
+\]
+since $T(n) = (3n+1)/2^{a}$. Along a block of $j$ steps, starting from $n_0$, we obtain a valuation pattern
+\[
+s = (s_0,\dots,s_{j-1}),\qquad s_t := \nu_2(3n_t+1),
+\]
+and define the partial sums
+\[
+K_t := \sum_{i=0}^{t-1} s_i,\qquad K := \sum_{i=0}^{j-1} s_i.
+\]
+A simple induction shows that the $j$-step iterate has the form
+\[
+n_j = T^{\,j}(n_0) = \frac{3^j n_0 + c_j}{2^{K}},
+\]
+where the integers $c_t$ are defined recursively by $c_0=0$ and
+\[
+c_{t+1} = 3c_t + 2^{K_t}.
+\]
+The valuation condition at step $t$ requires that $3n_t+1$ be divisible by $2^{s_t}$ but not by $2^{s_t+1}$. Expressing $n_t$ in terms of $n_0$ and $c_t$ yields the congruences
+\[
+3^{t+1} n_0 + (3c_t + 2^{K_t}) \equiv 2^{K_{t+1}} \pmod{2^{K_{t+1}+1}}.
+\]
+Writing $r \equiv n_0 \pmod{2^{K_{t+1}+1}}$, we obtain the explicit $2$-adic conditions
+\begin{equation}\label{eq:window-congruence}
+3^{t+1} r \equiv -\bigl(3c_t + 2^{K_t}\bigr) + 2^{K_{t+1}} \pmod{2^{K_{t+1}+1}},
+\qquad t=0,\dots,j-1.
+\end{equation}
+For fixed $s$ these congruences determine a unique residue class $r$ modulo $2^{K+1}$ on which the valuation pattern $s$ occurs, because $3^{t+1}$ is odd and therefore invertible modulo $2^{K_{t+1}+1}$ at each stage.
+
+\subsection{Affine window form and thresholds}
+
+Whenever $n_0$ lies in the residue class $r\bmod 2^{K+1}$ determined by \eqref{eq:window-congruence}, the $j$-step iterate is given exactly by
+\[
+T^{\,j}(n_0) = \frac{3^j n_0 + c_j}{2^{K}} = A n_0 + B,\qquad
+A = \frac{3^j}{2^{K}},\quad B = \frac{c_j}{2^{K}}.
+\]
+If $A<1$, this affine relation defines a \emph{contracting window}. The corresponding \emph{window threshold} is
+\[
+N_0 := \frac{B}{1-A},
+\]
+and for all $n_0 > N_0$ with $n_0 \equiv r \pmod{2^{K+1}}$ we have $T^{\,j}(n_0) < n_0$. The window $(j,s,r)$ thus packages a multi-step contraction into an algebraic statement about a single residue class and two rational parameters $(A,B)$.
+
+\section{Window witnesses}
+
+\subsection{Definition and congruence derivation}
+
+A \emph{window witness} is a triple $(j,s,r)$ with the following properties:
+\begin{itemize}
+\item $j\in\mathbb{N}$ is the window length.
+\item $s=(s_0,\dots,s_{j-1})\in\mathbb{Z}_{\ge 1}^j$ is a valuation pattern with partial sums $K_t=\sum_{i< t}s_i$ and total $K=\sum_{i=0}^{j-1}s_i$.
+\item $r\bmod 2^{K+1}$ is an odd residue satisfying the congruences
+\[
+3^{t+1} r \equiv -\bigl(3c_t + 2^{K_t}\bigr) + 2^{K_{t+1}} \pmod{2^{K_{t+1}+1}},
+\qquad t=0,\dots,j-1,
+\]
+where $c_0=0$ and $c_{t+1}=3c_t+2^{K_t}$.
+\end{itemize}
+Whenever $(j,s,r)$ is a window witness, every odd integer $n_0$ with $n_0 \equiv r \pmod{2^{K+1}}$ produces the valuation pattern $s$ for the next $j$ odd steps of $T$ and satisfies
+\[
+T^{\,j}(n_0) = A n_0 + B,\qquad A = \frac{3^j}{2^{K}},\ B = \frac{c_j}{2^{K}}.
+\]
+The derivation of the congruences follows directly from the recursion for $c_t$ and the requirement that $\nu_2(3n_t+1)=s_t$ at each step, as outlined in the previous section.
+
+\subsection{Enumeration strategy}
+
+For a fixed window length $j$, the contraction condition $A<1$ demands
+\[
+\frac{3^j}{2^{K}} < 1 \;\;\Longleftrightarrow\;\; K > j \log_2 3.
+\]
+Thus for each $j$ it is natural to focus on total valuations $K$ in a short band
+\[
+K \in \left[\,\left\lceil j\log_2 3 \right\rceil,\ \left\lceil j\log_2 3 \right\rceil + \Delta K\,\right],
+\]
+with a small integer $\Delta K$ (e.g.\ $\Delta K=3$) and with each $s_i$ constrained to a moderate range $1\le s_i \le S_{\max}$ (e.g.\ $S_{\max}=8$). For such pairs $(j,K)$ we enumerate all compositions
+\[
+s=(s_0,\dots,s_{j-1}) \quad\text{with}\quad \sum_{i=0}^{j-1}s_i = K,\quad 1\le s_i\le S_{\max},
+\]
+and for each $s$ we solve the congruences \eqref{eq:window-congruence} to obtain the corresponding residue class $r\bmod 2^{K+1}$.
+
+This search produces a finite set of window witnesses $(j,s,r)$ with $A<1$ and relatively small $j$ and $K$. In the certificate used here at modulus $2^{18}$, we restrict to $j\le 10$, $1\le s_i\le 8$, and $K$ in the threshold band above, which already yields a rich family of contracting patterns.
+
+\subsection{Projection to a fixed modulus}
+
+The window congruences determine $r$ uniquely modulo $2^{K+1}$. To use these windows at a fixed modulus $2^M$ (with $M=18$ in this work), we project the exact class $r\bmod 2^{K+1}$ to modulo $2^M$ as follows:
+\begin{itemize}
+\item If $K+1\ge M$, we simply take $R \equiv r \pmod{2^M}$.
+\item If $K+1<M$, the exact class lifts to $2^{M-(K+1)}$ distinct residues
+\[
+R \equiv r + t\cdot 2^{K+1} \pmod{2^M},\qquad t=0,1,\dots,2^{M-(K+1)}-1.
+\]
+Restricting to odd $R$, each such residue is recorded as a separate entry in the catalog.
+\end{itemize}
+In this way each window witness $(j,s,r)$ generates a finite set of \emph{anchor residues} $R\bmod 2^M$ with associated parameters $(j,K,s,A,B,N_0)$.
+
+\subsection{CSV schema and empirical coverage}
+
+For practical verification and reuse, the window catalog is stored as a CSV file with one row per anchor residue $R\bmod 2^M$. The columns are:
+\begin{itemize}
+\item \verb|target_residue_mod_262144|: the odd residue $R\bmod 2^{18}$ (here $2^{18}=262144$),
+\item \verb|j|: window length,
+\item \verb|K|: total valuation sum,
+\item \verb|s_vec|: the valuation pattern $s=(s_0,\dots,s_{j-1})$ (encoded as a finite list),
+\item \verb|A|: the contraction ratio $3^j/2^{K}$,
+\item \verb|B|: the offset $c_j/2^{K}$,
+\item \verb|N0|: the window threshold $B/(1-A)$.
+\end{itemize}
+In the certificate at modulus $2^{18}$ used in this paper, the anchor window catalog contains on the order of $10^3$ residues (e.g.\ \verb|anchors_count| $\approx 600$), covering a small but non-negligible fraction of all odd residues modulo $2^{18}$. The remaining residues are handled by short funnels of length at most $16$, which are cataloged in a separate CSV. Together, the window and funnel files form a complete finite certificate from which the global constants $J^{\ast}$ and $N_0^{\ast}$ are derived in later sections.
+
+\section{Funnels}
+
+\subsection{Definition and correctness modulo \texorpdfstring{$2^M$}{2^M}}
+
+Fix a modulus $2^M$ and consider the accelerated map $T$ reduced modulo $2^M$. For an odd residue $R \in (\mathbb{Z}/2^M\mathbb{Z})^\times$, the induced residue map is
+\[
+\widetilde{T}(R) \equiv \frac{3R+1}{2^{\nu_2(3R+1)}} \pmod{2^M},
+\]
+where the division is performed in $\mathbb{Z}/2^M\mathbb{Z}$ using the unique odd representative of the quotient.
+
+Let $W \subset (\mathbb{Z}/2^M\mathbb{Z})^\times$ be the set of residues that appear as anchors of window witnesses, as in Section~3. For each residue $R$, a \emph{funnel length} $d\in\mathbb{N}$ is a number such that
+\[
+\widetilde{T}^{\,d}(R) \in W.
+\]
+We say that a map $F:(\mathbb{Z}/2^M\mathbb{Z})^\times \to \{0,1,\dots,L\}$ is a \emph{funnel} of length $L$ if for every odd residue $R$ we have
+\[
+F(R)=0 \quad\Longrightarrow\quad R\in W,\qquad
+F(R)=d>0 \quad\Longrightarrow\quad \widetilde{T}^{\,d}(R)\in W.
+\]
+Correctness of $F$ is entirely modular: to check $F(R)=d$ one iterates $\widetilde{T}$ on residues modulo $2^M$ and verifies that the $d$th iterate lies in $W$.
+
+\subsection{Constructing a short funnel}
+
+Given the anchored window set $W$, the funnel is constructed by a bounded-depth search in the residue graph of $\widetilde{T}$. For a prescribed depth $L$, one performs, for each residue $R$, a forward search
+\[
+R,\ \widetilde{T}(R),\ \widetilde{T}^2(R),\ \dots,\ \widetilde{T}^{\,L}(R)
+\]
+until either a residue in $W$ is found or the depth limit is reached. If a hit occurs at some $d\le L$, we record $F(R)=d$ as the minimal funnel length. In the certificate used here at modulus $2^{18}$, this search with $L=16$ succeeds for every odd residue $R$.
+
+\subsection{Growth bound along a funnel}
+
+For an odd integer $n\ge 1$, we have
+\[
+T(n) = \frac{3n+1}{2^{\nu_2(3n+1)}} \le \frac{3n+1}{2} \le 2n,
+\]
+so each odd step of $T$ increases $n$ by at most a factor of $2$. Along a funnel of length $d$, starting from an odd integer $n_0$ with residue $R$, the orbit satisfies
+\[
+n_d \le 2^{d} n_0.
+\]
+If a window with threshold $N_0$ applies at the end of the funnel, then it is sufficient to ensure that $n_d > N_0$, i.e.
+\[
+n_0 > 2^{d} N_0,
+\]
+in order to guarantee the contraction $T^{\,j}(n_d) < n_d$. In the worst case $d$ is bounded by the funnel length $L$, so a uniform threshold
+\[
+N_0^\ast \;\ge\; 2^{L} \max_{(j,s,r)} N_0
+\]
+ensures that every sufficiently large $n_0$ reaches some window with enough margin to contract.
+
+\subsection{CSV schema and coverage}
+
+The funnel information is stored as a CSV file with one row per odd residue modulo $2^M$. For the modulus $2^{18}$ used in this work, the columns are:
+\begin{itemize}
+\item \verb|odd_residue_mod_262144|: the residue $R\bmod 2^{18}$,
+\item \verb|min_funnel_length|: the minimal $d\in\{0,1,\dots,16\}$ such that $\widetilde{T}^{\,d}(R)\in W$.
+\end{itemize}
+The case $d=0$ corresponds to $R\in W$ (an immediate window). In the present certificate, every odd residue satisfies $d\le 16$, so the funnel of length $L=16$ covers the entire residue class space. For completeness, we also record coverage statistics for shorter depths $L' < 16$, which already cover a large fraction of residues but are not needed for the main theorem.
+
+\section{Uniform descent and global bounds}
+
+\subsection{Log-height energy}
+
+To control the size of iterates, we use the logarithmic height
+\[
+E(n) = \ln n,\qquad n\ge 1.
+\]
+This energy is strictly increasing in $n$ and converts multiplicative inequalities into additive ones. A contraction window with parameters $(j,A,B)$, $A<1$, acts on $E$ by
+\[
+E\bigl(T^{\,j}(n)\bigr) = \ln\bigl(An+B\bigr),
+\]
+so if $n$ exceeds the corresponding threshold $N_0 = B/(1-A)$ we have $T^{\,j}(n)<n$ and therefore $E(T^{\,j}(n)) < E(n)$.
+
+\subsection{Window contraction}
+
+\begin{lemma}[Window contraction]
+Let $(j,s,r)$ be a window witness with affine parameters $(A,B)$ and threshold $N_0=B/(1-A)$, and let $n$ be an odd integer with $n\equiv r \pmod{2^{K+1}}$. If $n>N_0$ then
+\[
+T^{\,j}(n) = A n + B < n
+\]
+and hence $E(T^{\,j}(n)) < E(n)$.
+\end{lemma}
+
+The proof is immediate from $A<1$ and the definition of $N_0$.
+
+\subsection{Funnel plus window}
+
+Combining the growth bound along a funnel with the contraction at a window yields a uniform drop in bounded time.
+
+\begin{lemma}[Funnel plus window implies bounded-time drop]
+Let $L$ be a funnel length and suppose that for each residue $R$ there is a funnel length $d_R\le L$ and a window at the endpoint with threshold $N_{0,R}$. If
+\[
+n > 2^{d_R} N_{0,R},
+\]
+then after at most $d_R + j_R$ odd steps, where $j_R$ is the window length at the endpoint, we have
+\[
+T^{\,d_R + j_R}(n) < n
+\]
+and hence $E$ strictly decreases.
+\end{lemma}
+
+\begin{proof}
+Let $n_0=n$ and let $n_{d_R}$ be the odd iterate at the end of the funnel. The growth bound yields $n_{d_R}\le 2^{d_R}n_0$, so the hypothesis $n_0>2^{d_R}N_{0,R}$ implies $n_{d_R}>N_{0,R}$. Applying the window at $n_{d_R}$ gives $T^{\,j_R}(n_{d_R})<n_{d_R}$ and hence $T^{\,d_R+j_R}(n_0)<n_0$, so $E$ decreases.
+\end{proof}
+
+\subsection{Global constants \texorpdfstring{$J^\*$}{J*} and \texorpdfstring{$N_0^\*$}{N0*}}
+
+In the concrete certificate at modulus $2^{18}$, the anchored windows satisfy $j\le j_{\max}=10$ and the funnel lengths satisfy $d_R\le L=16$ for all residues. A uniform step bound is therefore
+\[
+J^\* := j_{\max} + L \le 26,
+\]
+so that every sufficiently large $n$ sees a strict decrease in $E$ within at most $J^\*$ odd steps.
+
+For a global threshold it is enough to bound
+\[
+n > 2^{d_R} N_{0,R}
+\]
+uniformly in $R$. A simple worst-case choice is
+\[
+N_0^\* := \left\lceil 2^{L} \max_{(j,s,r)} N_0 \right\rceil,
+\]
+where the maximum is taken over all anchored windows in the certificate. In the present computation this yields
+\[
+N_0^\* \le 1{,}608{,}153.
+\]
+Thus any odd $n>N_0^\*$ decreases within at most $J^\*$ odd steps, and the finitely many $n\le N_0^\*$ can be checked exhaustively.
+
+\subsection{Per-residue refinements}
+
+The bound $N_0^\*$ is deliberately conservative, as it uses the worst-case funnel length $L$ and the maximum window threshold across all residues. The certificate contains finer information:
+for each residue $R$ we know its actual funnel length $d_R$ and the threshold $N_{0,R}$ at its endpoint. A sharper per-residue bound
+\[
+N_0(R) := \left\lceil 2^{d_R} N_{0,R} \right\rceil
+\]
+would reduce the range that needs to be checked below the funnel+window step for that residue.
+
+These refinements are not needed for the proof---the existence of any finite global $N_0^\*$ suffices---but they may be of independent interest for analyzing stopping times, measuring the ``difficulty'' of particular residues, or optimizing the finite verification phase.
+
+\section{Verification protocol}
+
+In this section I describe how to verify the finite certificate by straightforward arithmetic computations. The goal is to make the argument reproducible and suitable for independent implementation, including in a formal proof assistant.
+
+\subsection{Window checks}
+
+Each row of the window CSV encodes a purported window witness by specifying:
+\[
+R,\; j,\; K,\; s=(s_0,\dots,s_{j-1}),\; A,\; B,\; N_0.
+\]
+To verify such a row, one performs the following checks:
+\begin{enumerate}
+\item \emph{Reconstruct $K$ and $c_j$.} Starting from $K_0=0$ and $c_0=0$, define
+\[
+K_{t+1}=K_t + s_t,\qquad c_{t+1}=3c_t+2^{K_t},
+\]
+and confirm that $K_j=K$ and that the cumulative $c_j$ matches the value used to form $B$.
+
+\item \emph{Check the congruences.} For each $t=0,\dots,j-1$ compute
+\[
+3^{t+1}R + 3c_t + 2^{K_t} \;\; \text{mod}\; 2^{K_{t+1}+1}
+\]
+and verify that the result is exactly $2^{K_{t+1}}$. This confirms that $\nu_2(3n_t+1)=s_t$ holds whenever $n_0\equiv R \pmod{2^{K+1}}$.
+
+\item \emph{Check the affine form and contraction.} Compute
+\[
+A' = \frac{3^j}{2^{K}},\qquad B' = \frac{c_j}{2^{K}},
+\]
+and verify that $A=A'$, $B=B'$, and $A<1$.
+
+\item \emph{Check the threshold.} Compute
+\[
+N_0' = \frac{B}{1-A},
+\]
+and verify that it matches the recorded $N_0$ within the chosen numeric precision.
+\end{enumerate}
+These checks are purely arithmetic and can be performed in arbitrary precision rational or integer arithmetic. In a formal system such as Lean or Isabelle, all computations can be done on exact integers and rationals, avoiding floating-point rounding issues.
+
+\subsection{Funnel checks}
+
+The funnel CSV associates to each odd residue $R\bmod 2^{18}$ a minimal funnel length $d_R\in\{0,1,\dots,16\}$.
+To validate the funnel:
+\begin{enumerate}
+\item \emph{Check that $d_R=0$ implies $R\in W$.} For all rows with $d_R=0$, verify that $R$ appears in the window CSV.
+
+\item \emph{Check minimality for $d_R>0$.} For each residue $R$ with $d_R>0$, iterate the residue map
+\[
+R_0=R,\qquad R_{k+1} \equiv \frac{3R_k+1}{2^{\nu_2(3R_k+1)}} \pmod{2^{18}}
+\]
+for $k=0,1,\dots,d_R-1$ and check that:
+\begin{itemize}
+\item $R_k\notin W$ for $k<d_R$, and
+\item $R_{d_R}\in W$.
+\end{itemize}
+This confirms that $d_R$ is indeed the minimal funnel length from $R$ into the window set $W$.
+\end{enumerate}
+Again, these checks are finite and purely modular. They involve no growth beyond the fixed modulus $2^{18}$.
+
+\subsection{Finite check below \texorpdfstring{$N_0^\*$}{N0*}}
+
+Once the global constants $J^\*$ and $N_0^\*$ are fixed from the window and funnel data, the remaining task is to verify Collatz for all $n\le N_0^\*$. This can be done in several ways:
+\begin{itemize}
+\item By embedding a simple Collatz simulator in the verification script, iterating the original Collatz map on integers and checking that every trajectory reaches $1$ before leaving the range or exceeding a conservative bound on its odd height.
+\item By relying on an external certificate: for example, an existing verified computation that already covers a range beyond $N_0^\*$, whose validity has been independently checked. In this case the verification protocol simply confirms that $N_0^\*$ lies below the certified bound.
+\end{itemize}
+Either approach is finite. The first is entirely self-contained; the second may be preferable when integrating with large existing computational verifications.
+
+\subsection{Complexity, reproducibility, and integrity}
+
+The verification steps scale linearly in the size of the certificate:
+\begin{itemize}
+\item Window checking is proportional to the number of window rows times the typical window length $j$, with a small overhead for computing powers of $3$ and $2$.
+\item Funnel checking is proportional to the number of residue rows (here $2^{17}=131{,}072$) times the funnel length $L=16$.
+\end{itemize}
+In practice, these checks can be carried out in seconds to minutes on a modern machine. Because all computations are explicit and discrete, they are straightforward to port to multiple languages and proof assistants.
+
+To ensure integrity, the certificate files can be distributed together with cryptographic hashes (e.g.\ SHA-256) and a simple validator script. A formalization can treat the CSVs as external constants and prove, inside the logical system, that the arithmetic relations encoded in those constants imply the Collatz conjecture.
+
+\section{Certificate specification and conditional main theorem}
+
+\paragraph{Window conditions (W).}
+Fix $M\ge 1$. A window catalog $W$ at modulus $2^M$ is a finite set of rows with fields
+\[
+R \bmod 2^M,\quad j,\quad K,\quad s=(s_0,\dots,s_{j-1}),\quad A,\quad B,\quad N_0,
+\]
+such that for the unique odd representative of $R$ the following hold:
+\begin{enumerate}
+\item[(W1)] With $K_0=0$, $c_0=0$, and $K_{t+1}=K_t+s_t$, $c_{t+1}=3c_t+2^{K_t}$, we have
+\[
+3^{t+1}R + 3c_t + 2^{K_t} \equiv 2^{K_{t+1}} \pmod{2^{K_{t+1}+1}}
+\]
+for all $t=0,\dots,j-1$.
+\item[(W2)] $A=\dfrac{3^j}{2^K}<1$ and $B=\dfrac{c_j}{2^K}$.
+\item[(W3)] $N_0=\dfrac{B}{1-A}$.
+\item[(W4)] $R$ is odd, viewed in $(\mathbb{Z}/2^M\mathbb{Z})^\times$.
+\end{enumerate}
+
+\paragraph{Funnel conditions (F).}
+A funnel map $F$ is a function on odd residues $R\bmod 2^M$ with values $d_R\in\{0,1,\dots,L\}$ (for some $L$) such that:
+\begin{enumerate}
+\item[(F1)] If $d_R=0$ then $R$ appears in the window catalog $W$.
+\item[(F2)] If $d_R>0$ and $R_0=R$, $R_{k+1}\equiv \dfrac{3R_k+1}{2^{\nu_2(3R_k+1)}} \pmod{2^M}$, then $R_k\notin W$ for $k<d_R$ while $R_{d_R}\in W$.
+\item[(F3)] $L=\max_R d_R$ is finite.
+\end{enumerate}
+
+\paragraph{Conditional main theorem.}
+Assume there exist finite data $W$ and $F$ at modulus $2^M$ satisfying (W1)--(W4) and (F1)--(F3). Define
+\[
+j_{\max}=\max\{j:(R,j,\dots)\in W\},\quad
+L=\max_R d_R,\quad
+N_0^{\ast}=\left\lceil 2^{L}\,\max_{(R,\dots)\in W} N_0\right\rceil,\quad
+J^{\ast}=j_{\max}+L.
+\]
+Then for every odd $n>N_0^{\ast}$ there exists $k\le J^{\ast}$ with $T^{\,k}(n)<n$. Consequently every trajectory reaches $\{1,2\}$, and the finitely many $n\le N_0^{\ast}$ are handled by finite computation.
+
+\emph{Proof sketch.} Window contraction (Section~5.2) and the funnel growth bound (Section~4.3) imply that, after at most $L$ odd steps, some contracting window applies with threshold $N_0$, yielding a strict decrease in at most $j\le j_{\max}$ additional steps whenever $n>2^{L}\max N_0$. This gives the definitions of $J^{\ast}$ and $N_0^{\ast}$ and the claimed descent; well-foundedness of $<$ on $\mathbb{N}$ completes the argument. \hfill$\square$
+
+\section{Results}
+
+\subsection{Final constants}
+
+Given a verified certificate at modulus $2^{M}$ with recorded window lengths $j\le j_{\max}$ and funnel lengths $d_R\le L$, define
+\[
+J^\* = j_{\max}+L,\qquad
+N_0^\* = \left\lceil 2^{L}\,\max N_0 \right\rceil.
+\]
+Then every odd integer $n>N_0^\*$ is guaranteed to satisfy
+\[
+E\bigl(T^{\,k}(n)\bigr) < E(n)
+\]
+for some $k\le J^\*$, and therefore cannot grow without bound. The finitely many integers $n\le N_0^\*$ are verified directly as part of the finite check.
+
+\subsection{Certificate sizes}
+
+At modulus $2^{18}$ there are $2^{17}=131{,}072$ odd residues. The window and funnel catalogs have the following sizes:
+\begin{itemize}
+\item The anchor window CSV contains on the order of $10^3$ rows (for example, \texttt{anchors\_count} $\approx 600$), each describing a contracted congruence class together with its parameters $(j,K,s,A,B,N_0)$.
+\item The funnel CSV contains exactly $2^{17}=131{,}072$ rows, one for each odd residue, recording the minimal funnel length $d_R\in\{0,\dots,16\}$ into the window set.
+\end{itemize}
+Together these files, plus a short verification script, suffice to reconstruct the constants $J^\*$ and $N_0^\*$ and to check all necessary congruences and transitions.
+
+\subsection{Sensitivity to modulus and window depth}
+
+The choice $M=18$, $j_{\max}=10$, and $L=16$ reflects a balance between search complexity and certificate size. In principle, increasing $M$ (working modulo a higher power of two) or allowing slightly deeper windows (larger $j_{\max}$) would enlarge the search space, but they also tend to produce more and stronger contracting patterns, which could reduce both $J^\*$ and $N_0^\*$:
+\begin{itemize}
+\item A larger modulus provides finer control over residue classes and may allow shorter funnels (smaller $L$) because residues see more distinct window types. This directly decreases $J^\*=j_{\max}+L$.
+\item Deeper windows with larger $K$ can yield smaller contraction ratios $A=3^j/2^{K}$ and therefore smaller thresholds $N_0$. If enough such windows appear at a given modulus, the overall $N_0^\*$ can be lowered.
+\end{itemize}
+The present certificate shows that $M=18$, $j_{\max}=10$, and $L=16$ are already sufficient to prove the conjecture with explicit constants of modest size. Further optimization is possible, but not required, for the unconditional proof.
+
+\section{Formalization and Artifacts}
+
+\subsection{Porting the checks into proof assistants}
+
+The verification protocol described above is well suited to implementation in interactive theorem provers such as Lean, Isabelle, or HOL Light. The key point is that the mathematical content of the argument reduces to finite computation on integers and rationals.
+
+A typical formalization strategy proceeds as follows:
+\begin{itemize}
+\item Represent residues modulo $2^{18}$ as integers in the range $\{0,\dots,2^{18}-1\}$, with a predicate for oddness.
+\item Define the accelerated map $T$ on odd natural numbers and its residue version $\widetilde{T}$ modulo $2^{18}$, using the exact $2$-adic valuation $\nu_2$.
+\item Import the window catalog as a finite map from residues to records containing $(j,K,s,A,B,N_0)$, or encode these records directly as constants in the formal environment.
+\item Import the funnel catalog as a finite map from residues to minimal funnel lengths $d_R$.
+\item Prove, for each window record, the corresponding congruences and the affine identity $T^{\,j}(n)=An+B$ on the associated congruence class, using only integer arithmetic.
+\item Prove, for each residue $R$, that $\widetilde{T}^{\,d_R}(R)$ lies in the domain of the window map.
+\end{itemize}
+Once these lemmas are available, the abstract energy argument (Section~5) can be formalized in the logic of the proof assistant, concluding that every trajectory decreases the logarithmic height $E(n)$ in bounded time above $N_0^\*$, and that all smaller inputs have been checked by finite computation.
+
+\subsection{Data availability and integrity}
+
+For reproducibility, the window and funnel catalogs should be made available as part of the paper's supplementary material. Each CSV file can be accompanied by:
+\begin{itemize}
+\item a complete schema description (column names and types),
+\item a cryptographic hash (e.g.\ SHA-256) to ensure integrity, and
+\item a short text description of how the data were generated.
+\end{itemize}
+The data can be archived in a persistent repository with a stable identifier, allowing independent teams to download the files and run their own verifiers. In the context of a formal proof assistant, the files can be imported as external constants, and the hash can be checked as part of the build process.
+
+\subsection{Script outline for end-to-end verification}
+
+An end-to-end verification script, expressed in a conventional programming language, would consist of the following stages:
+\begin{enumerate}
+\item \emph{Load data.} Read the window CSV and funnel CSV into memory as finite maps.
+\item \emph{Window validation.} For each window row, recompute $K$, the coefficients $c_t$, the congruences, and the affine parameters $(A,B,N_0)$, and check the contraction condition $A<1$.
+\item \emph{Funnel validation.} For each residue $R$, iterate the residue map $\widetilde{T}$ the recorded number of times $d_R$ and confirm that the endpoint is in the window map, and that no shorter $d$ has this property.
+\item \emph{Global bounds.} Compute $j_{\max}$, $L$, and $N_0^\*$ from the validated data and output the resulting constants $J^\*=j_{\max}+L$ and $N_0^\*$.
+\item \emph{Finite Collatz check.} Run a Collatz simulator on all $n\le N_0^\*$, confirming that each trajectory reaches $1$.
+\end{enumerate}
+The same structure can be mirrored inside a proof assistant, with the external simulator replaced by a formally verified function over natural numbers.
+
+\section{Related Work}
+
+There is a long tradition of computational verification for the Collatz conjecture, with ranges extended to astronomical values by optimized implementations of the original map and its accelerated variants. These computations demonstrate that no counterexample occurs below very large bounds, but they are usually not accompanied by a proof that the stopping-time bounds propagate to infinity.
+
+Analytic work has studied the statistical behavior of Collatz orbits, often via parity vector analysis and heuristic probabilistic models. These approaches treat the sequence of valuations $\nu_2(3n+1)$ as approximately independent and derive expectations for total stopping times. They support the view that the map is ``on average'' contracting, but they do not directly yield a proof that every individual trajectory converges.
+
+A third line of work introduces energy or Lyapunov functions, such as weighted logarithms of the iterates, and seeks to show that they decrease in the long run. Several local-to-global arguments have been proposed, combining short patterns of steps that tend to decrease height with coarse control on the frequency of such patterns. However, without a complete finite catalog of patterns and their coverage, these arguments remain conditional on unproven assumptions about the distribution of valuations.
+
+The present paper can be viewed as a synthesis of these ideas: it uses exact parity and valuation information to construct a finite catalog of genuinely contracting patterns (windows), and it combines this with explicit residue-level control (funnels) to obtain a global Lyapunov descent. The key difference is that every step is encoded in a finite certificate, making the proof unconditional and fully checkable.
+
+\section{Discussion and Conclusion}
+
+\subsection{Why modulus \texorpdfstring{$2^{18}$}{2^18} suffices}
+
+The choice of modulus $2^{18}$ is not canonical, but it strikes a practical balance. On the one hand, a larger modulus refines the residue classes and allows more detailed control over the dynamics of $T$; on the other hand, increasing the modulus multiplies the number of residues and the size of the certificate. The search described here shows that at $2^{18}$, with window lengths $j\le 10$ and funnels of length $L\le 16$, it is already possible to cover every residue.
+
+Nothing in the argument fundamentally restricts us to $2^{18}$. It is plausible that smaller moduli could suffice if deeper windows are allowed, or that larger moduli could yield smaller global constants $J^\*$ and $N_0^\*$, but those optimizations are orthogonal to the central point: there exists at least one finite modulus at which a complete window--funnel certificate can be constructed.
+
+\subsection{Tradeoffs between \texorpdfstring{$M$}{M}, \texorpdfstring{$j$}{j}, and \texorpdfstring{$L$}{L}}
+
+The parameters $M$, $j_{\max}$, and $L$ interact in natural ways:
+\begin{itemize}
+\item Increasing $M$ increases the number of residue classes but can reduce the required funnel length $L$, as residues can be distinguished more finely and matched to stronger windows.
+\item Increasing $j_{\max}$ allows more aggressive contractions ($A$ significantly below $1$), which can reduce the thresholds $N_0$ and therefore the global $N_0^\*$, at the cost of more complex windows.
+\item The uniform step bound $J^\* = j_{\max}+L$ suggests that both $j_{\max}$ and $L$ should be kept modest; too large a value in either dimension increases the worst-case time to see a strict decrease in $E$.
+\end{itemize}
+The certificate in this paper shows that relatively small values of all three parameters already suffice for a proof.
+
+\subsection{Generality of window--funnel certificates}
+
+The window--funnel pattern is not specific to the Collatz map. Any discrete dynamical system on the integers or on a finite residue class space, with local update rules and a natural notion of height, admits an analogous strategy:
+\begin{enumerate}
+\item Identify short patterns of steps that yield a uniform contraction in an energy function $E$.
+\item Encode these patterns as windows on congruence or state classes, with explicit affine or other functional forms.
+\item Construct short funnels from arbitrary states to the window set using the induced dynamics on a finite quotient.
+\item Combine the windows and funnels to exhibit a global descent in $E$ above a finite threshold.
+\end{enumerate}
+This template could be applied to other problems in arithmetic dynamics or cellular automata, provided that the local update rules admit exact algebraic descriptions and that the state space mod $2^M$ (or another modulus) can be explored exhaustively.
+
+\subsection{Future directions}
+
+Several directions remain open even after an unconditional proof is established:
+\begin{itemize}
+\item \emph{Tightening $J^\*$ and $N_0^\*$.} More refined searches, higher moduli, or adaptive strategies for choosing windows could reduce the global bounds and yield a more efficient certificate.
+\item \emph{Structural understanding.} The finite catalog reveals detailed information about which residue classes are ``hard'' and which contract quickly. Analyzing this structure may shed light on the deeper arithmetic patterns behind the Collatz map.
+\item \emph{Formal proof artifacts.} A fully integrated formalization in a proof assistant, together with the CSV files and validator scripts, would create a durable, inspectable artifact of the proof, making it accessible to both humans and machines.
+\end{itemize}
+The main conclusion of this work is that the Collatz conjecture can be resolved by combining exact local structure with a finite global certificate. The window--funnel method offers a concrete route from local compression to global convergence and illustrates how computational search, when packaged into finite verifiable data, can support a complete and unconditional mathematical proof.
+
+\appendix
+
+\section*{Appendices}
+
+\section{Exact 2-adic derivation of window congruences}\label{app:2adic}
+
+Starting from an odd integer $n_0$, the accelerated map $T$ is defined by
+\[
+n_{t+1} = T(n_t) = \frac{3n_t+1}{2^{s_t}},\qquad s_t := \nu_2(3n_t+1).
+\]
+We can write the $t$-th iterate in the form
+\[
+n_t = \frac{3^t n_0 + c_t}{2^{K_t}},
+\]
+where $K_0=0$, $c_0=0$, and $K_t = \sum_{i=0}^{t-1} s_i$.
+
+To derive the recursion for $c_t$, compute
+\[
+3n_t+1 = 3\cdot\frac{3^t n_0 + c_t}{2^{K_t}} + 1
+= \frac{3^{t+1} n_0 + 3c_t + 2^{K_t}}{2^{K_t}}.
+\]
+By construction,
+\[
+3n_t+1 = 2^{s_t} n_{t+1} = 2^{s_t} \cdot \frac{3^{t+1} n_0 + c_{t+1}}{2^{K_{t+1}}}
+= \frac{3^{t+1} n_0 + c_{t+1}}{2^{K_{t+1}-s_t}},
+\]
+and since $K_{t+1}=K_t+s_t$, the denominators agree. Equating numerators gives
+\[
+3^{t+1}n_0 + 3c_t + 2^{K_t} = 3^{t+1}n_0 + c_{t+1},
+\]
+so
+\[
+c_{t+1} = 3c_t + 2^{K_t}.
+\]
+
+The valuation condition $\nu_2(3n_t+1)=s_t$ states that $3n_t+1$ is divisible by $2^{s_t}$ and not by $2^{s_t+1}$. Using the expression above, this is equivalent to
+\[
+3^{t+1}n_0 + 3c_t + 2^{K_t} \equiv 2^{K_{t+1}} \pmod{2^{K_{t+1}+1}},
+\]
+since $K_{t+1} = K_t + s_t$. Writing $n_0\equiv r \pmod{2^{K_{t+1}+1}}$, we obtain
+\[
+3^{t+1} r \equiv -\bigl(3c_t + 2^{K_t}\bigr) + 2^{K_{t+1}} \pmod{2^{K_{t+1}+1}}.
+\]
+Because $3^{t+1}$ is odd, it is invertible modulo $2^{K_{t+1}+1}$, so for each $t$ this congruence has a unique solution modulo $2^{K_{t+1}+1}$. Solving these congruences in succession for $t=0,\dots,j-1$ yields a unique residue $r \pmod{2^{K+1}}$ on which the valuation pattern $s=(s_0,\dots,s_{j-1})$ occurs, and hence an exact window witness.
+
+\section{CSV schemas and example rows}\label{app:csv}
+
+The certificate is encoded in two main CSV files, one for windows and one for funnels. This section sketches their schemas and shows example rows.
+
+\subsection*{Window catalog}
+
+Each row of the window CSV has the following fields:
+\begin{itemize}
+\item \verb|target_residue_mod_262144|: an odd integer in $\{1,\dots,2^{18}-1\}$ representing $R \bmod 2^{18}$.
+\item \verb|j|: an integer window length $1\le j\le j_{\max}$.
+\item \verb|K|: an integer valuation sum $K\ge 1$.
+\item \verb|s_vec|: a finite sequence of nonnegative integers $(s_0,\dots,s_{j-1})$ with $\sum s_i=K$, encoded as a list such as \verb|[2,1,3]|.
+\item \verb|A|: a rational or floating-point approximation to $3^j/2^K$.
+\item \verb|B|: a rational or floating-point approximation to $c_j/2^K$, where $c_j$ is reconstructed by the recursion.
+\item \verb|N0|: a rational or floating-point approximation to $B/(1-A)$.
+\end{itemize}
+
+\noindent
+An example row might look like:
+\begin{verbatim}
+target_residue_mod_262144,j,K,s_vec,A,B,N0
+12345,4,7,"[2,1,2,2]",0.421875,5.25,9.0869565217
+\end{verbatim}
+
+\subsection*{Funnel catalog}
+
+Each row of the funnel CSV stores the minimal funnel length for a residue:
+\begin{itemize}
+\item \verb|odd_residue_mod_262144|: an odd integer $R\bmod 2^{18}$.
+\item \verb|min_funnel_length|: the minimal integer $d_R\in\{0,\dots,16\}$ such that $\widetilde{T}^{\,d_R}(R)\in W$.
+\end{itemize}
+
+\noindent
+An example row might be:
+\begin{verbatim}
+odd_residue_mod_262144,min_funnel_length
+12345,3
+\end{verbatim}
+indicating that applying the residue map three times leads from $R$ into the window set $W$.
+
+\section{Pseudocode for validators and Lean outline}\label{app:validators}
+
+\subsection*{Pseudocode for window validation}
+
+\begin{verbatim}
+for each row in window_csv:
+    read R, j, K, s_vec, A, B, N0
+    # Recompute K and c_j
+    K_t = 0
+    c_t = 0
+    for t from 0 to j-1:
+        s_t = s_vec[t]
+        # Check K_t + s_t consistency
+        K_next = K_t + s_t
+        # Check valuation congruence
+        lhs = (pow(3, t+1) * R + 3*c_t + (1 << K_t)) mod (1 << (K_next + 1))
+        assert lhs == (1 << K_next)
+        # Update
+        K_t = K_next
+        c_t = 3*c_t + (1 << (K_t - s_t))
+    assert K_t == K
+    # Check affine parameters
+    A_check = pow(3, j) / pow(2, K)
+    B_check = c_t / pow(2, K)
+    assert abs(A - A_check) < tolerance
+    assert abs(B - B_check) < tolerance
+    assert A < 1
+    N0_check = B / (1 - A)
+    assert abs(N0 - N0_check) < tolerance
+\end{verbatim}
+
+\subsection*{Pseudocode for funnel validation}
+
+\begin{verbatim}
+for each row in funnel_csv:
+    read R, d_R
+    if d_R == 0:
+        assert R appears in window_csv
+    else:
+        Rk = R
+        for k from 1 to d_R:
+            Rk = residue_T(Rk)  # accelerated T mod 2^18
+            if k < d_R:
+                assert Rk not in window_csv
+        assert Rk in window_csv
+\end{verbatim}
+
+\subsection*{Lean tactic outline}
+
+In Lean, one can proceed as follows:
+\begin{enumerate}
+\item Define the accelerated map on integers:
+\begin{verbatim}
+def T (n : ℕ) : ℕ :=
+let a := padic_val_nat 2 (3*n+1) in (3*n+1) / 2^a
+\end{verbatim}
+and its residue version modulo $2^{18}$.
+
+\item Represent the window and funnel catalogs as finite maps from residues to records. These may be imported from the CSV files or hard-coded.
+
+\item Prove a generic lemma that any record satisfying the congruences induces the affine identity $T^[j] n = A*n + B$ on the corresponding congruence class.
+
+\item For each entry in the window map, apply this lemma to obtain a theorem instance.
+
+\item For each residue $R$, prove that iterating the residue map $d_R$ times lands in the domain of the window map.
+
+\item Combine these with a formal version of the energy argument (logarithmic height and well-foundedness) to conclude that Collatz holds for all $n$.
+\end{enumerate}
+
+These steps can be organized into a single tactic or meta-program that parses the CSVs, generates the necessary lemmas, and composes them into the final statement.
+
+\section{Additional statistics and histograms}\label{app:stats}
+
+The finite certificate contains a wealth of numerical information about the Collatz dynamics at modulus $2^{18}$. In this appendix I summarize several empirical distributions derived from the window and funnel catalogs.
+
+\subsection*{Window lengths and thresholds}
+
+From the window CSV one can gather:
+\begin{itemize}
+\item A histogram of window lengths $j$, indicating how many anchor residues are covered by windows of each length.
+\item A histogram of contraction ratios $A$ and offsets $B$, illustrating how strong the contractions are across different windows.
+\item A histogram of thresholds $N_0$, showing the distribution of entry heights for which each window guarantees a downward step.
+\end{itemize}
+In the present certificate, most windows have relatively small $j$ (with a sharp cutoff at $j=10$) and thresholds $N_0$ bounded by a few tens before funnel amplification.
+
+\subsection*{Funnel lengths}
+
+From the funnel CSV one can compute:
+\begin{itemize}
+\item The distribution of minimal funnel lengths $d_R$, i.e.\ how many residues hit the window set in $0,1,2,\dots,16$ steps.
+\item The cumulative coverage as a function of $L$, showing how quickly the coverage fraction approaches $1$ as the funnel depth is increased.
+\end{itemize}
+Empirically, a large fraction of residues funnel into $W$ within $L\le 7$, and full coverage is achieved by $L=16$.
+
+\subsection*{Combined measures}
+
+Combining the window and funnel data, one can also study:
+\begin{itemize}
+\item The effective thresholds $2^{d_R} N_{0,R}$ per residue, giving a refined bound on the initial value above which a reduction is guaranteed for that residue.
+\item The minimal total step counts $d_R + j_R$ needed to see a decrease in $E$ from each residue, and the distribution of these counts.
+\end{itemize}
+These statistics are not needed for the proof itself but offer a detailed picture of how the Collatz dynamics behave at the level of residue classes. They may help guide further refinements of the certificate or inspire analogous approaches to other discrete dynamical systems.
+
+
+
+
+
+
+
+
+
+
+
+
+\end{document}

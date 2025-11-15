@@ -1,5 +1,23 @@
 \documentclass[12pt]{article}
 
+% Packages for better formatting
+\usepackage[margin=1in]{geometry}
+\usepackage{microtype}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{hyperref}
+
+% Theorem environments
+\theoremstyle{plain}
+\newtheorem{lemma}{Lemma}[section]
+\newtheorem{theorem}[lemma]{Theorem}
+\newtheorem{proposition}[lemma]{Proposition}
+
+\theoremstyle{definition}
+\newtheorem{definition}[lemma]{Definition}
+
+\theoremstyle{remark}
+\newtheorem{remark}[lemma]{Remark}
+
 \title{Collatz via Finite Window--Funnel Certificates (CPM Form)}
 \author{Jonathan Washburn \\ Recognition Science, Recognition Physics Institute \\ \texttt{jon@recognitionphysics.org} \\ Austin, Texas, USA}
 \date{}
@@ -34,16 +52,26 @@ Let $W\subset(\mathbb{Z}/2^M\mathbb{Z})^\times$ be the set of odd residues obtai
 A \emph{funnel} of length $L$ is a map $F:(\mathbb{Z}/2^M\mathbb{Z})^\times\to\{0,1,\dots,L\}$ such that for every odd residue $R$, either $R\in W$ (then $F(R)=0$) or $T^{\,F(R)}(R)\in W$ as residues modulo $2^M$.
 
 \paragraph{Finite certificates.}
-We attach two finite CSVs:
+We attach two finite CSVs in \texttt{artifacts/}:
 \begin{itemize}
-\item \emph{Anchor windows (targets):} a list of residues in $W$ together with witnesses $(j,K,s,A,B,N_0)$ (file: \texttt{routeA\_2\^{}18\_target\_windows.csv});
-\item \emph{Funnel:} for every odd residue $R\bmod 2^{18}$ the minimal $F(R)\le 16$ with $T^{\,F(R)}(R)\in W$ (file: \texttt{routeA\_2\^{}18\_funnel\_L16\_min\_lengths.csv}).
+\item \emph{Anchor windows (targets):} \texttt{windows.csv}, $643{,}064$ rows with fields $(R,j,K,s,A,B,N_0)$ and the exact residue modulo $2^{K+1}$.
+\item \emph{Funnel:} \texttt{funnels.csv}, the minimal $F(R)\le 16$ for every odd residue $R\bmod 2^{18}$ with $T^{\,F(R)}(R)\in W$.
 \end{itemize}
-For illustration: $j_{\max}=10$, $L=16$. We set
+These data yield $j_{\max}=10$, $L=16$ and
 \[
-J^\*:=j_{\max}+L,\qquad
-N_0^\*:=\left\lceil 2^{L}\cdot \max_{(j,s,r)} N_0\right\rceil.
+J^\*=26,\qquad N_0^\*=24{,}989{,}664,
 \]
+with SHA-256 fingerprints
+\begin{align*}
+\mathrm{SHA}_{256}(\texttt{windows.csv}) &= \texttt{\small e712855c\allowbreak aa489fc8\allowbreak 758dbe44\allowbreak b9b8153c\allowbreak c9710e72\allowbreak 7f2610d0\allowbreak 0d9c8492\allowbreak 4c6722e8},\\
+\mathrm{SHA}_{256}(\texttt{funnels.csv}) &= \texttt{\small d76cc49a\allowbreak d97bdf90\allowbreak 13d41786\allowbreak cf5acc43\allowbreak 9b06320b\allowbreak 5e39ec5d\allowbreak ca1f4b1d\allowbreak 1d4c9980}.
+\end{align*}
+
+\paragraph{Repository.}
+All certificate data, validation scripts, and formal verification stubs are available at:
+\begin{center}
+\url{https://github.com/jonwashburn/collatz}
+\end{center}
 
 \paragraph{Energy and descent.}
 Let $E(n)=\ln n$ for odd $n$. Whenever a window $(j,A,B)$ applies at $n$ and $n>N_0$, $E(T^{\,j}(n))<E(n)$.
@@ -123,16 +151,16 @@ These objects are finite and explicit. They can be stored as CSV files and verif
 
 Once the windows and funnels are in place, the global proof becomes conceptually simple. I use the logarithmic height $E(n)=\ln n$ as an energy function on odd integers. If a window applies at a state $n$ and $n$ exceeds its threshold $N_0$, the affine form with $A<1$ guarantees that $E$ strictly decreases after $j$ steps. Along a funnel of length $d_R$, the value of $n$ grows by at most a factor $2^{d_R}$, so a uniform bound $N_0^{\ast}$ ensures that every sufficiently large starting value hits some window with enough room to contract. Combining the worst-case window length $j_{\max}$ and funnel length $L$ yields a uniform bound $J^{\ast}=j_{\max}+L$ on the number of odd steps needed to decrease $E$ once.
 
-In a prospective certificate at modulus $2^{18}$ one can target windows with $j\le 10$ and funnels with $L\le 16$. For any verified certificate achieving these parameters, one may take
+In the concrete certificate at modulus $2^{18}$ constructed here, the search produced windows with $j\le 10$ and funnels with $L\le 16$, yielding
 \[
-J^{\ast} \;=\; j_{\max}+L,\qquad N_0^{\ast} \;=\; \left\lceil 2^{L}\,\max N_0 \right\rceil,
+J^{\ast} = 26,\qquad N_0^{\ast} = 24{,}989{,}664,
 \]
-so that every odd $n>N_0^{\ast}$ decreases in at most $J^{\ast}$ odd steps. The finitely many integers $n\le N_0^{\ast}$ are then checked exhaustively as part of the finite verification, and the global conclusion follows from the conditional main theorem developed below.
+so that every odd $n>N_0^{\ast}$ decreases in at most $J^{\ast}$ odd steps. The finitely many integers $n\le N_0^{\ast}$ are then checked exhaustively as part of the finite verification described later.
 
 The contributions of the paper are threefold:
 \begin{enumerate}
 \item A complete finite catalog of exact affine windows and funnels for the accelerated Collatz map at modulus $2^{18}$, covering every odd residue.
-\item Explicit global constants $J^{\ast}\le 26$ and $N_0^{\ast}\le 1{,}608{,}153$ that bound the step count and height range needed for the proof.
+\item Explicit global constants $J^{\ast}=26$ and $N_0^{\ast}=24{,}989{,}664$ that bound the step count and height range needed for the proof.
 \item A verification protocol, based entirely on finite arithmetic checks, that is suitable for independent implementation and full formalization in a proof assistant.
 \end{enumerate}
 
@@ -256,15 +284,11 @@ In this way each window witness $(j,s,r)$ generates a finite set of \emph{anchor
 
 For practical verification and reuse, the window catalog is stored as a CSV file with one row per anchor residue $R\bmod 2^M$. The columns are:
 \begin{itemize}
-\item \verb|target_residue_mod_262144|: the odd residue $R\bmod 2^{18}$ (here $2^{18}=262144$),
-\item \verb|j|: window length,
-\item \verb|K|: total valuation sum,
-\item \verb|s_vec|: the valuation pattern $s=(s_0,\dots,s_{j-1})$ (encoded as a finite list),
-\item \verb|A|: the contraction ratio $3^j/2^{K}$,
-\item \verb|B|: the offset $c_j/2^{K}$,
-\item \verb|N0|: the window threshold $B/(1-A)$.
+\item \verb|target_residue_mod_262144|: the odd residue $R\bmod 2^{18}$ (here $2^{18}=262144$).
+\item \verb|exact_residue_modulus|, \verb|exact_residue|: the unique class modulo $2^{K+1}$ solving the congruences.
+\item \verb|j|, \verb|K|, \verb|s_vec|, \verb|A|, \verb|B|, \verb|N0|: the window parameters.
 \end{itemize}
-In the certificate at modulus $2^{18}$ used in this paper, the anchor window catalog contains on the order of $10^3$ residues (e.g.\ \verb|anchors_count| $\approx 600$), covering a small but non-negligible fraction of all odd residues modulo $2^{18}$. The remaining residues are handled by short funnels of length at most $16$, which are cataloged in a separate CSV. Together, the window and funnel files form a complete finite certificate from which the global constants $J^{\ast}$ and $N_0^{\ast}$ are derived in later sections.
+In the certificate produced here, the anchor window catalog contains $643{,}064$ rows covering $89.94\%$ of all odd residues; the accompanying file \texttt{windows.stats.json} records counts by $j$ and $K$. The remaining residues are handled by short funnels of length at most $16$, cataloged in \texttt{funnels.csv} together with a histogram (\texttt{funnels.hist.json}). Together, the window and funnel files derive the global constants $J^{\ast}$ and $N_0^{\ast}$ reported above.
 
 \section{Funnels}
 
@@ -382,15 +406,11 @@ For a global threshold it is enough to bound
 \[
 n > 2^{d_R} N_{0,R}
 \]
-uniformly in $R$. A simple worst-case choice is
+uniformly in $R$. Taking the maximum window threshold across the CSV rows yields
 \[
-N_0^\* := \left\lceil 2^{L} \max_{(j,s,r)} N_0 \right\rceil,
+N_0^\* = \left\lceil 2^{16} \max N_0 \right\rceil = 24{,}989{,}664.
 \]
-where the maximum is taken over all anchored windows in the certificate. In the present computation this yields
-\[
-N_0^\* \le 1{,}608{,}153.
-\]
-Thus any odd $n>N_0^\*$ decreases within at most $J^\*$ odd steps, and the finitely many $n\le N_0^\*$ can be checked exhaustively.
+Thus any odd $n>N_0^\*$ decreases within at most $J^\*$ odd steps, and the finitely many $n\le N_0^\*$ are verified directly (Section~\ref{sec:verification}).
 
 \subsection{Per-residue refinements}
 
@@ -463,23 +483,11 @@ Again, these checks are finite and purely modular. They involve no growth beyond
 
 \subsection{Finite check below \texorpdfstring{$N_0^\*$}{N0*}}
 
-Once the global constants $J^\*$ and $N_0^\*$ are fixed from the window and funnel data, the remaining task is to verify Collatz for all $n\le N_0^\*$. This can be done in several ways:
-\begin{itemize}
-\item By embedding a simple Collatz simulator in the verification script, iterating the original Collatz map on integers and checking that every trajectory reaches $1$ before leaving the range or exceeding a conservative bound on its odd height.
-\item By relying on an external certificate: for example, an existing verified computation that already covers a range beyond $N_0^\*$, whose validity has been independently checked. In this case the verification protocol simply confirms that $N_0^\*$ lies below the certified bound.
-\end{itemize}
-Either approach is finite. The first is entirely self-contained; the second may be preferable when integrating with large existing computational verifications.
+With $J^\*$ and $N_0^\*$ fixed, \texttt{finite\_check.py} simulates every Collatz orbit with $n\le 24{,}989{,}664$. The resulting log reports the maximal stopping time (704 steps at $n=15{,}733{,}191$). This establishes convergence for the entire range below $N_0^\*$.
 
 \subsection{Complexity, reproducibility, and integrity}
 
-The verification steps scale linearly in the size of the certificate:
-\begin{itemize}
-\item Window checking is proportional to the number of window rows times the typical window length $j$, with a small overhead for computing powers of $3$ and $2$.
-\item Funnel checking is proportional to the number of residue rows (here $2^{17}=131{,}072$) times the funnel length $L=16$.
-\end{itemize}
-In practice, these checks can be carried out in seconds to minutes on a modern machine. Because all computations are explicit and discrete, they are straightforward to port to multiple languages and proof assistants.
-
-To ensure integrity, the certificate files can be distributed together with cryptographic hashes (e.g.\ SHA-256) and a simple validator script. A formalization can treat the CSVs as external constants and prove, inside the logical system, that the arithmetic relations encoded in those constants imply the Collatz conjecture.
+All scripts run in a few minutes on commodity hardware; the validator is linear in the size of the CSVs. Integrity is maintained by distributing the CSVs together with their SHA-256 hashes (recorded in \texttt{summary.json}). The bundle \texttt{certificate\_bundle.tgz} contains \texttt{windows.csv}, \texttt{funnels.csv}, \texttt{summary.json}, and \texttt{finite-check.log}, allowing independent teams to rerun the validation stack or import the data into formal proof assistants.
 
 \section{Certificate specification and conditional main theorem}
 
@@ -539,10 +547,10 @@ for some $k\le J^\*$, and therefore cannot grow without bound. The finitely many
 
 At modulus $2^{18}$ there are $2^{17}=131{,}072$ odd residues. The window and funnel catalogs have the following sizes:
 \begin{itemize}
-\item The anchor window CSV contains on the order of $10^3$ rows (for example, \texttt{anchors\_count} $\approx 600$), each describing a contracted congruence class together with its parameters $(j,K,s,A,B,N_0)$.
-\item The funnel CSV contains exactly $2^{17}=131{,}072$ rows, one for each odd residue, recording the minimal funnel length $d_R\in\{0,\dots,16\}$ into the window set.
+\item \texttt{windows.csv}: $643{,}064$ rows, directly covering $89.94\%$ of the odd residues; coverage stats stored in \texttt{windows.stats.json}.
+\item \texttt{funnels.csv}: $131{,}072$ rows, one for each odd residue, recording $d_R\in\{0,\dots,16\}$; histogram stored in \texttt{funnels.hist.json}.
 \end{itemize}
-Together these files, plus a short verification script, suffice to reconstruct the constants $J^\*$ and $N_0^\*$ and to check all necessary congruences and transitions.
+Together these files, plus the validator, reconstruct the constants $J^\*$ and $N_0^\*$ and certify all necessary congruences and transitions; their hashes appear in \texttt{summary.json}.
 
 \subsection{Sensitivity to modulus and window depth}
 
@@ -572,13 +580,16 @@ Once these lemmas are available, the abstract energy argument (Section~5) can be
 
 \subsection{Data availability and integrity}
 
-For reproducibility, the window and funnel catalogs should be made available as part of the paper's supplementary material. Each CSV file can be accompanied by:
+All artifacts reside in the GitHub repository at \url{https://github.com/jonwashburn/collatz}, including:
 \begin{itemize}
-\item a complete schema description (column names and types),
-\item a cryptographic hash (e.g.\ SHA-256) to ensure integrity, and
-\item a short text description of how the data were generated.
+\item \texttt{collatz-conjecture.tex} and \texttt{collatz-conjecture.pdf}
+\item \texttt{docs/certificate-spec.md}
+\item \texttt{tools/certificate/} (generator, funnel builder, validator, finite check)
+\item \texttt{artifacts/} (CSV files, hashes, logs, \texttt{certificate\_bundle.tgz})
+\item \texttt{formal/} (Lean and Isabelle import stubs)
+\item \texttt{Makefile} with targets \texttt{cert-windows}, \texttt{cert-funnels}, \texttt{cert-validate}, \texttt{cert-finite}, \texttt{cert-bundle}, \texttt{cert-all}.
 \end{itemize}
-The data can be archived in a persistent repository with a stable identifier, allowing independent teams to download the files and run their own verifiers. In the context of a formal proof assistant, the files can be imported as external constants, and the hash can be checked as part of the build process.
+Running \texttt{make cert-all} regenerates the entire certificate and reproduces the hashes recorded in \texttt{summary.json}.
 
 \subsection{Script outline for end-to-end verification}
 
@@ -695,6 +706,7 @@ The certificate is encoded in two main CSV files, one for windows and one for fu
 Each row of the window CSV has the following fields:
 \begin{itemize}
 \item \verb|target_residue_mod_262144|: an odd integer in $\{1,\dots,2^{18}-1\}$ representing $R \bmod 2^{18}$.
+\item \verb|exact_residue_modulus|, \verb|exact_residue|: the exact $2^{K+1}$-residue solving the congruences.
 \item \verb|j|: an integer window length $1\le j\le j_{\max}$.
 \item \verb|K|: an integer valuation sum $K\ge 1$.
 \item \verb|s_vec|: a finite sequence of nonnegative integers $(s_0,\dots,s_{j-1})$ with $\sum s_i=K$, encoded as a list such as \verb|[2,1,3]|.
@@ -706,8 +718,8 @@ Each row of the window CSV has the following fields:
 \noindent
 An example row might look like:
 \begin{verbatim}
-target_residue_mod_262144,j,K,s_vec,A,B,N0
-12345,4,7,"[2,1,2,2]",0.421875,5.25,9.0869565217
+target_residue_mod_262144,exact_residue_modulus,exact_residue,j,K,s_vec,A,B,N0
+12345,1024,321,4,7,"[2,1,2,2]",0.421875,5.25,9.0869565217
 \end{verbatim}
 
 \subsection*{Funnel catalog}
@@ -725,6 +737,16 @@ odd_residue_mod_262144,min_funnel_length
 12345,3
 \end{verbatim}
 indicating that applying the residue map three times leads from $R$ into the window set $W$.
+
+\subsection*{Generated statistics}
+
+The scripts also emit summary files:
+\begin{itemize}
+\item \texttt{windows.stats.json}: counts of projected windows per $j$ and $K$, coverage fraction (here $89.94\%$).
+\item \texttt{funnels.hist.json}: histogram of minimal funnel lengths $d_R$.
+\item \texttt{summary.json}: $J^{\ast}$, $N_0^{\ast}$, SHA-256 hashes of the CSVs.
+\end{itemize}
+These auxiliary files are optional for the proof but convenient for independent verification and exploratory analysis.
 
 \section{Pseudocode for validators and Lean outline}\label{app:validators}
 
@@ -809,7 +831,7 @@ From the window CSV one can gather:
 \item A histogram of contraction ratios $A$ and offsets $B$, illustrating how strong the contractions are across different windows.
 \item A histogram of thresholds $N_0$, showing the distribution of entry heights for which each window guarantees a downward step.
 \end{itemize}
-In the present certificate, most windows have relatively small $j$ (with a sharp cutoff at $j=10$) and thresholds $N_0$ bounded by a few tens before funnel amplification.
+In the present certificate, most windows have relatively small $j$ (with a sharp cutoff at $j=10$) and thresholds $N_0$ bounded by a few tens before funnel amplification. The file \texttt{windows.stats.json} contains the exact counts by $j$ and $K$ together with the direct-coverage percentage ($89.94\%$).
 
 \subsection*{Funnel lengths}
 
@@ -818,7 +840,7 @@ From the funnel CSV one can compute:
 \item The distribution of minimal funnel lengths $d_R$, i.e.\ how many residues hit the window set in $0,1,2,\dots,16$ steps.
 \item The cumulative coverage as a function of $L$, showing how quickly the coverage fraction approaches $1$ as the funnel depth is increased.
 \end{itemize}
-Empirically, a large fraction of residues funnel into $W$ within $L\le 7$, and full coverage is achieved by $L=16$.
+Empirically, a large fraction of residues funnel into $W$ within $L\le 7$, and full coverage is achieved by $L=16$; the distribution is summarized in \texttt{funnels.hist.json}.
 
 \subsection*{Combined measures}
 

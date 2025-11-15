@@ -59,7 +59,7 @@ We attach two finite CSVs in \texttt{artifacts/}:
 \end{itemize}
 These data yield $j_{\max}=10$, $L=16$ and
 \[
-J^\*=26,\qquad N_0^\*=24{,}989{,}664,
+J^{\ast}=26,\qquad N_0^{\ast}=24{,}989{,}664,
 \]
 with SHA-256 fingerprints
 \begin{align*}
@@ -80,15 +80,15 @@ Combining, if $n>2^{d}N_0$, then after $\le d$ steps we enter the window and wit
 
 \paragraph{Main lemma (finite certificate $\Rightarrow$ global convergence).}
 Given the two CSVs above, define for each residue $R$ the data $(d_R,j_R,N_{0,R})$, with $d_R=F(R)$ and $(j_R,N_{0,R})$ taken from the target window.
-Then for any odd $n>N_0^\*$, the orbit strictly decreases within at most $J^\*=j_{\max}+L$ odd steps.
-Iterating, the odd values cannot stay $>N_0^\*$ forever; once $\le N_0^\*$, finitely many cases remain and are checked directly.
+Then for any odd $n>N_0^{\ast}$, the orbit strictly decreases within at most $J^{\ast}=j_{\max}+L$ odd steps.
+Iterating, the odd values cannot stay $>N_0^{\ast}$ forever; once $\le N_0^{\ast}$, finitely many cases remain and are checked directly.
 Therefore every trajectory reaches $\{1,2\}$.
 
 \paragraph{Verification protocol.}
 \begin{enumerate}
 \item For each window row, re-verify the exact congruences modulo $2^{K_t+1}$ and $3^j<2^K$, compute $A,B,N_0$.
 \item For each residue $R$, verify $T^{\,F(R)}(R)\in W$ (mod $2^{18}$).
-\item Check $N_0^\*$ exceeds all $2^{F(R)}N_{0,R}$; then verify Collatz for all $n\le N_0^\*$ (finite).
+\item Check $N_0^{\ast}$ exceeds all $2^{F(R)}N_{0,R}$; then verify Collatz for all $n\le N_0^{\ast}$ (finite).
 \end{enumerate}
 All steps are finite and elementary.
 \hfill$\square$
@@ -335,7 +335,7 @@ n_0 > 2^{d} N_0,
 \]
 in order to guarantee the contraction $T^{\,j}(n_d) < n_d$. In the worst case $d$ is bounded by the funnel length $L$, so a uniform threshold
 \[
-N_0^\ast \;\ge\; 2^{L} \max_{(j,s,r)} N_0
+N_0^{\ast} \;\ge\; 2^{L} \max_{(j,s,r)} N_0
 \]
 ensures that every sufficiently large $n_0$ reaches some window with enough margin to contract.
 
@@ -394,13 +394,13 @@ and hence $E$ strictly decreases.
 Let $n_0=n$ and let $n_{d_R}$ be the odd iterate at the end of the funnel. The growth bound yields $n_{d_R}\le 2^{d_R}n_0$, so the hypothesis $n_0>2^{d_R}N_{0,R}$ implies $n_{d_R}>N_{0,R}$. Applying the window at $n_{d_R}$ gives $T^{\,j_R}(n_{d_R})<n_{d_R}$ and hence $T^{\,d_R+j_R}(n_0)<n_0$, so $E$ decreases.
 \end{proof}
 
-\subsection{Global constants \texorpdfstring{$J^\*$}{J*} and \texorpdfstring{$N_0^\*$}{N0*}}
+\subsection{Global constants \texorpdfstring{$J^{\ast}$}{J*} and \texorpdfstring{$N_0^{\ast}$}{N0*}}
 
 In the concrete certificate at modulus $2^{18}$, the anchored windows satisfy $j\le j_{\max}=10$ and the funnel lengths satisfy $d_R\le L=16$ for all residues. A uniform step bound is therefore
 \[
-J^\* := j_{\max} + L \le 26,
+J^{\ast} := j_{\max} + L \le 26,
 \]
-so that every sufficiently large $n$ sees a strict decrease in $E$ within at most $J^\*$ odd steps.
+so that every sufficiently large $n$ sees a strict decrease in $E$ within at most $J^{\ast}$ odd steps.
 
 For a global threshold it is enough to bound
 \[
@@ -408,20 +408,20 @@ n > 2^{d_R} N_{0,R}
 \]
 uniformly in $R$. Taking the maximum window threshold across the CSV rows yields
 \[
-N_0^\* = \left\lceil 2^{16} \max N_0 \right\rceil = 24{,}989{,}664.
+N_0^{\ast} = \left\lceil 2^{16} \max N_0 \right\rceil = 24{,}989{,}664.
 \]
-Thus any odd $n>N_0^\*$ decreases within at most $J^\*$ odd steps, and the finitely many $n\le N_0^\*$ are verified directly (Section~\ref{sec:verification}).
+Thus any odd $n>N_0^{\ast}$ decreases within at most $J^{\ast}$ odd steps, and the finitely many $n\le N_0^{\ast}$ are verified directly (Section~\ref{sec:verification}).
 
 \subsection{Per-residue refinements}
 
-The bound $N_0^\*$ is deliberately conservative, as it uses the worst-case funnel length $L$ and the maximum window threshold across all residues. The certificate contains finer information:
+The bound $N_0^{\ast}$ is deliberately conservative, as it uses the worst-case funnel length $L$ and the maximum window threshold across all residues. The certificate contains finer information:
 for each residue $R$ we know its actual funnel length $d_R$ and the threshold $N_{0,R}$ at its endpoint. A sharper per-residue bound
 \[
 N_0(R) := \left\lceil 2^{d_R} N_{0,R} \right\rceil
 \]
 would reduce the range that needs to be checked below the funnel+window step for that residue.
 
-These refinements are not needed for the proof---the existence of any finite global $N_0^\*$ suffices---but they may be of independent interest for analyzing stopping times, measuring the ``difficulty'' of particular residues, or optimizing the finite verification phase.
+These refinements are not needed for the proof---the existence of any finite global $N_0^{\ast}$ suffices---but they may be of independent interest for analyzing stopping times, measuring the ``difficulty'' of particular residues, or optimizing the finite verification phase.
 
 \section{Verification protocol}
 
@@ -481,9 +481,9 @@ This confirms that $d_R$ is indeed the minimal funnel length from $R$ into the w
 \end{enumerate}
 Again, these checks are finite and purely modular. They involve no growth beyond the fixed modulus $2^{18}$.
 
-\subsection{Finite check below \texorpdfstring{$N_0^\*$}{N0*}}
+\subsection{Finite check below \texorpdfstring{$N_0^{\ast}$}{N0*}}
 
-With $J^\*$ and $N_0^\*$ fixed, \texttt{finite\_check.py} simulates every Collatz orbit with $n\le 24{,}989{,}664$. The resulting log reports the maximal stopping time (704 steps at $n=15{,}733{,}191$). This establishes convergence for the entire range below $N_0^\*$.
+With $J^{\ast}$ and $N_0^{\ast}$ fixed, \texttt{finite\_check.py} simulates every Collatz orbit with $n\le 24{,}989{,}664$. The resulting log reports the maximal stopping time (704 steps at $n=15{,}733{,}191$). This establishes convergence for the entire range below $N_0^{\ast}$.
 
 \subsection{Complexity, reproducibility, and integrity}
 
@@ -534,14 +534,14 @@ Then for every odd $n>N_0^{\ast}$ there exists $k\le J^{\ast}$ with $T^{\,k}(n)<
 
 Given a verified certificate at modulus $2^{M}$ with recorded window lengths $j\le j_{\max}$ and funnel lengths $d_R\le L$, define
 \[
-J^\* = j_{\max}+L,\qquad
-N_0^\* = \left\lceil 2^{L}\,\max N_0 \right\rceil.
+J^{\ast} = j_{\max}+L,\qquad
+N_0^{\ast} = \left\lceil 2^{L}\,\max N_0 \right\rceil.
 \]
-Then every odd integer $n>N_0^\*$ is guaranteed to satisfy
+Then every odd integer $n>N_0^{\ast}$ is guaranteed to satisfy
 \[
 E\bigl(T^{\,k}(n)\bigr) < E(n)
 \]
-for some $k\le J^\*$, and therefore cannot grow without bound. The finitely many integers $n\le N_0^\*$ are verified directly as part of the finite check.
+for some $k\le J^{\ast}$, and therefore cannot grow without bound. The finitely many integers $n\le N_0^{\ast}$ are verified directly as part of the finite check.
 
 \subsection{Certificate sizes}
 
@@ -550,14 +550,14 @@ At modulus $2^{18}$ there are $2^{17}=131{,}072$ odd residues. The window and fu
 \item \texttt{windows.csv}: $643{,}064$ rows, directly covering $89.94\%$ of the odd residues; coverage stats stored in \texttt{windows.stats.json}.
 \item \texttt{funnels.csv}: $131{,}072$ rows, one for each odd residue, recording $d_R\in\{0,\dots,16\}$; histogram stored in \texttt{funnels.hist.json}.
 \end{itemize}
-Together these files, plus the validator, reconstruct the constants $J^\*$ and $N_0^\*$ and certify all necessary congruences and transitions; their hashes appear in \texttt{summary.json}.
+Together these files, plus the validator, reconstruct the constants $J^{\ast}$ and $N_0^{\ast}$ and certify all necessary congruences and transitions; their hashes appear in \texttt{summary.json}.
 
 \subsection{Sensitivity to modulus and window depth}
 
-The choice $M=18$, $j_{\max}=10$, and $L=16$ reflects a balance between search complexity and certificate size. In principle, increasing $M$ (working modulo a higher power of two) or allowing slightly deeper windows (larger $j_{\max}$) would enlarge the search space, but they also tend to produce more and stronger contracting patterns, which could reduce both $J^\*$ and $N_0^\*$:
+The choice $M=18$, $j_{\max}=10$, and $L=16$ reflects a balance between search complexity and certificate size. In principle, increasing $M$ (working modulo a higher power of two) or allowing slightly deeper windows (larger $j_{\max}$) would enlarge the search space, but they also tend to produce more and stronger contracting patterns, which could reduce both $J^{\ast}$ and $N_0^{\ast}$:
 \begin{itemize}
-\item A larger modulus provides finer control over residue classes and may allow shorter funnels (smaller $L$) because residues see more distinct window types. This directly decreases $J^\*=j_{\max}+L$.
-\item Deeper windows with larger $K$ can yield smaller contraction ratios $A=3^j/2^{K}$ and therefore smaller thresholds $N_0$. If enough such windows appear at a given modulus, the overall $N_0^\*$ can be lowered.
+\item A larger modulus provides finer control over residue classes and may allow shorter funnels (smaller $L$) because residues see more distinct window types. This directly decreases $J^{\ast}=j_{\max}+L$.
+\item Deeper windows with larger $K$ can yield smaller contraction ratios $A=3^j/2^{K}$ and therefore smaller thresholds $N_0$. If enough such windows appear at a given modulus, the overall $N_0^{\ast}$ can be lowered.
 \end{itemize}
 The present certificate shows that $M=18$, $j_{\max}=10$, and $L=16$ are already sufficient to prove the conjecture with explicit constants of modest size. Further optimization is possible, but not required, for the unconditional proof.
 
@@ -576,7 +576,7 @@ A typical formalization strategy proceeds as follows:
 \item Prove, for each window record, the corresponding congruences and the affine identity $T^{\,j}(n)=An+B$ on the associated congruence class, using only integer arithmetic.
 \item Prove, for each residue $R$, that $\widetilde{T}^{\,d_R}(R)$ lies in the domain of the window map.
 \end{itemize}
-Once these lemmas are available, the abstract energy argument (Section~5) can be formalized in the logic of the proof assistant, concluding that every trajectory decreases the logarithmic height $E(n)$ in bounded time above $N_0^\*$, and that all smaller inputs have been checked by finite computation.
+Once these lemmas are available, the abstract energy argument (Section~5) can be formalized in the logic of the proof assistant, concluding that every trajectory decreases the logarithmic height $E(n)$ in bounded time above $N_0^{\ast}$, and that all smaller inputs have been checked by finite computation.
 
 \subsection{Data availability and integrity}
 
@@ -598,8 +598,8 @@ An end-to-end verification script, expressed in a conventional programming langu
 \item \emph{Load data.} Read the window CSV and funnel CSV into memory as finite maps.
 \item \emph{Window validation.} For each window row, recompute $K$, the coefficients $c_t$, the congruences, and the affine parameters $(A,B,N_0)$, and check the contraction condition $A<1$.
 \item \emph{Funnel validation.} For each residue $R$, iterate the residue map $\widetilde{T}$ the recorded number of times $d_R$ and confirm that the endpoint is in the window map, and that no shorter $d$ has this property.
-\item \emph{Global bounds.} Compute $j_{\max}$, $L$, and $N_0^\*$ from the validated data and output the resulting constants $J^\*=j_{\max}+L$ and $N_0^\*$.
-\item \emph{Finite Collatz check.} Run a Collatz simulator on all $n\le N_0^\*$, confirming that each trajectory reaches $1$.
+\item \emph{Global bounds.} Compute $j_{\max}$, $L$, and $N_0^{\ast}$ from the validated data and output the resulting constants $J^{\ast}=j_{\max}+L$ and $N_0^{\ast}$.
+\item \emph{Finite Collatz check.} Run a Collatz simulator on all $n\le N_0^{\ast}$, confirming that each trajectory reaches $1$.
 \end{enumerate}
 The same structure can be mirrored inside a proof assistant, with the external simulator replaced by a formally verified function over natural numbers.
 
@@ -619,15 +619,15 @@ The present paper can be viewed as a synthesis of these ideas: it uses exact par
 
 The choice of modulus $2^{18}$ is not canonical, but it strikes a practical balance. On the one hand, a larger modulus refines the residue classes and allows more detailed control over the dynamics of $T$; on the other hand, increasing the modulus multiplies the number of residues and the size of the certificate. The search described here shows that at $2^{18}$, with window lengths $j\le 10$ and funnels of length $L\le 16$, it is already possible to cover every residue.
 
-Nothing in the argument fundamentally restricts us to $2^{18}$. It is plausible that smaller moduli could suffice if deeper windows are allowed, or that larger moduli could yield smaller global constants $J^\*$ and $N_0^\*$, but those optimizations are orthogonal to the central point: there exists at least one finite modulus at which a complete window--funnel certificate can be constructed.
+Nothing in the argument fundamentally restricts us to $2^{18}$. It is plausible that smaller moduli could suffice if deeper windows are allowed, or that larger moduli could yield smaller global constants $J^{\ast}$ and $N_0^{\ast}$, but those optimizations are orthogonal to the central point: there exists at least one finite modulus at which a complete window--funnel certificate can be constructed.
 
 \subsection{Tradeoffs between \texorpdfstring{$M$}{M}, \texorpdfstring{$j$}{j}, and \texorpdfstring{$L$}{L}}
 
 The parameters $M$, $j_{\max}$, and $L$ interact in natural ways:
 \begin{itemize}
 \item Increasing $M$ increases the number of residue classes but can reduce the required funnel length $L$, as residues can be distinguished more finely and matched to stronger windows.
-\item Increasing $j_{\max}$ allows more aggressive contractions ($A$ significantly below $1$), which can reduce the thresholds $N_0$ and therefore the global $N_0^\*$, at the cost of more complex windows.
-\item The uniform step bound $J^\* = j_{\max}+L$ suggests that both $j_{\max}$ and $L$ should be kept modest; too large a value in either dimension increases the worst-case time to see a strict decrease in $E$.
+\item Increasing $j_{\max}$ allows more aggressive contractions ($A$ significantly below $1$), which can reduce the thresholds $N_0$ and therefore the global $N_0^{\ast}$, at the cost of more complex windows.
+\item The uniform step bound $J^{\ast} = j_{\max}+L$ suggests that both $j_{\max}$ and $L$ should be kept modest; too large a value in either dimension increases the worst-case time to see a strict decrease in $E$.
 \end{itemize}
 The certificate in this paper shows that relatively small values of all three parameters already suffice for a proof.
 
@@ -646,7 +646,7 @@ This template could be applied to other problems in arithmetic dynamics or cellu
 
 Several directions remain open even after an unconditional proof is established:
 \begin{itemize}
-\item \emph{Tightening $J^\*$ and $N_0^\*$.} More refined searches, higher moduli, or adaptive strategies for choosing windows could reduce the global bounds and yield a more efficient certificate.
+\item \emph{Tightening $J^{\ast}$ and $N_0^{\ast}$.} More refined searches, higher moduli, or adaptive strategies for choosing windows could reduce the global bounds and yield a more efficient certificate.
 \item \emph{Structural understanding.} The finite catalog reveals detailed information about which residue classes are ``hard'' and which contract quickly. Analyzing this structure may shed light on the deeper arithmetic patterns behind the Collatz map.
 \item \emph{Formal proof artifacts.} A fully integrated formalization in a proof assistant, together with the CSV files and validator scripts, would create a durable, inspectable artifact of the proof, making it accessible to both humans and machines.
 \end{itemize}
